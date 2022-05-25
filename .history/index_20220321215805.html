@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta charset="utf-8">
+  <title>The Adventures of an Introvert</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
+  <base target="_blank" />
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    #map {
+      height: 100%;
+    }
+
+    #nav-panel {
+      position: absolute;
+      cursor: pointer;
+      left: 10px;
+      bottom: 32px;
+      z-index: 5;
+      /*height: 38px;*/
+      /* background-color: rgb(255, 255, 255);
+      box-shadow: 0px 1px 4px -1px rgba(0, 0, 0, 0.3);
+      border-radius: 2px;*/
+    }
+
+    #nav-panel a {
+      padding: 8px;
+      background-color: rgb(255, 255, 255);
+      box-shadow: 0px 1px 4px -1px rgba(0, 0, 0, 0.3);
+      border-radius: 2px;
+      font-family: Roboto, Arial, sans-serif;
+      font-size: 18px;
+      color: rgb(86, 86, 86);
+      font-weight: 400;
+      text-align: center;
+      margin-right: 4px;
+    }
+
+    #social-panel {
+      position: absolute;
+      cursor: pointer;
+      /* font-family: Roboto,Arial,sans-serif;
+      font-size: 11px;
+      font-weight: 400;*/
+      /*margin-left: 10px;*/
+      /* margin-top: -115px;*/
+      top: 10px;
+      right: 10px;
+      /* width: 100px;*/
+      /* bottom: 50%;*/
+      /* left: 0px;*/
+      z-index: 5;
+      /*background-color: rgb(255, 255, 255);*/
+      /*border-radius: 2px;*/
+      /*padding: 8px;*/
+      /* text-align: center;*/
+    }
+
+    #social-panel img {
+      box-shadow: 0px 1px 4px -1px rgba(0, 0, 0, 0.3);
+      width: 30px;
+      height: 30px;
+      margin-left: 4px;
+      border-radius: 2px;
+    }
+
+    #bubbleContent {
+      width: 100%;
+    }
+
+    #play {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+
+    #loader {
+      position: absolute;
+      left: 50%;
+      margin-left: -60px;
+      top: 50%;
+      margin-top: -60px;
+      z-index: 10;
+      border: 16px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 16px solid orange;
+      border-right: 16px solid green;
+      border-bottom: 16px solid green;
+      border-left: 16px solid green;
+      width: 120px;
+      height: 120px;
+      -webkit-animation: spin 2s linear infinite;
+      animation: spin 2s linear infinite;
+    }
+
+    @-webkit-keyframes spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+      }
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="loader"></div>
+  <div id="nav-panel">
+    <a onclick="infoWindowSetAndOpen(markers.length-1);">[&#9668; Первая</a>
+    <a onclick="infoWindowSetAndOpen(latestMarker+1);">&#9668; Предыдущая</a>
+    <a onclick="infoWindowSetAndOpen(latestMarker-1);">Следующая &#9658;</a>
+    <a onclick="infoWindowSetAndOpen(0);">Последняя &#9658;]</a>
+  </div>
+
+  <div id="social-panel">
+    <a href="https://www.flickr.com/photos/igorgrigoryev" target="_blank">
+      <img src="img/flickr.png">
+    </a>
+<!--
+    <a href="https://www.facebook.com/Igor.V.Grigoryev" target="_blank">
+      <img src="img/fb.png">
+    </a>
+
+    <a href="https://www.instagram.com/ivg313/" target="_blank">
+      <img src="img/instagram.png">
+    </a>
+-->
+    <a href="https://www.youtube.com/c/IgorGrigoryev" target="_blank">
+      <img src="img/yt.png">
+    </a>
+
+    <a href="https://twitter.com/ivg" target="_blank">
+      <img src="img/twitter.png">
+    </a>
+
+    <a href="https://vk.com/ivg313" target="_blank">
+      <img src="img/vk.png">
+    </a>
+
+    <a href="https://www.drive2.ru/users/ivg313/" target="_blank">
+      <img src="img/d2.png">
+    </a>
+  </div>
+  <div id="map"></div>
+  <script>
+    var map;
+    var infoWindow;
+    var markers = [];
+    var photos = [];
+    var latestMarker;
+    var oms;
+    var id;
+    var GETArr = parseGetParams();
+
+    function initMap() {
+      var myLatLng = { lat: 0, lng: 0 };
+      map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 2,
+        keyboardShortcuts: false,
+        center: myLatLng,
+        zoomControl: true,
+        mapTypeControl: true,
+        scaleControl: true,
+        streetViewControl: false,
+        rotateControl: false,
+        fullscreenControl: false,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+      });
+
+      infoWindow = new google.maps.InfoWindow();
+
+    }
+
+    var addMarker = function (photo) {
+      icon = 'img/camera.png';
+
+      switch (photo.media) {
+        case 'photo':
+          icon = 'img/camera.png';
+          break;
+        case 'video':
+          icon = 'img/camera-video.png'
+
+          break;
+      }
+
+      var marker = new google.maps.Marker({
+        position: { lat: +photo.latitude, lng: +photo.longitude },
+        map: map,
+        title: photo.title,
+        icon: icon
+        //icon: { url: photo.url_sq, scaledSize: new google.maps.Size(28, 28) }
+      });
+
+      var markerNum = markers.push(marker) - 1;
+      oms.addMarker(marker);
+
+      /*
+          if (markerNum == 0) {
+            infoWindowSetAndOpen(0);
+          }
+      */
+      marker.addListener('click', function () {
+        infoWindowSetAndOpen(markerNum);
+      });
+
+      marker.addListener('mouseover', function () {
+        if (photo.media != 'video') marker.setIcon({ url: photo.url_sq, scaledSize: new google.maps.Size(28, 28) });
+      })
+    }
+
+    function infoWindowSetAndOpen(num) {
+      FlickrBubbleContent(photos[num], num)
+      latestMarker = num;
+      console.log(num);
+    }
+
+    function setHotkeys() {
+      addEventListener('keyup', function (event) {
+        console.log("keyCode: " + event.keyCode);
+        switch (event.keyCode) {
+          case 40: // Down
+            infoWindowSetAndOpen(latestMarker);
+            document.getElementById('goFlickr').click();
+            return false;
+          case 39: // Right
+            if (latestMarker != 0) infoWindowSetAndOpen(latestMarker - 1);
+            return false;
+          case 37: // Left
+            if (latestMarker != markers.length - 1) infoWindowSetAndOpen(latestMarker + 1);
+            return false;
+          case 38: // Up
+          case 32: //SpaceBar
+            infoWindowSetAndOpen(latestMarker);
+            document.getElementById('goBig').click();
+        }
+      });
+    }
+    setHotkeys();
+
+    var setBubbleWidth = function (imgWidth) {
+      var bubbleContent = document.getElementById('bubbleContent');
+      bubbleContent.style.width = imgWidth + 'px';
+    }
+
+    function setMarkers() {
+      document.getElementById("loader").style.display = "none";
+      oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, markersWontMove: true, markersWontHide: true });
+      photos.forEach(addMarker);
+      var bounds = new google.maps.LatLngBounds();
+      for (var i = 0; i < markers.length; i++) {
+        bounds.extend(markers[i].getPosition());
+      }
+      map.fitBounds(bounds);
+
+
+      if (GETArr.id) {
+        var check = indexOf(photos, GETArr.id, 'id');
+        if (check != -1) {
+          id = check;
+        } else {
+          id = 0;
+          alert("ID doesn't exist. Showing newest photo instead.")
+        }
+
+
+      } else {
+        // id = indexOf(photos, '39440462741', 'id');
+        id = 0; 
+      }
+
+
+      infoWindowSetAndOpen(id);
+      
+
+
+
+      //console.log(photos);
+      //console.log(GETArr);
+
+    }
+
+    function parseGetParams() {
+      var $_GET = {};
+      var __GET = window.location.search.substring(1).split("&");
+      for (var i = 0; i < __GET.length; i++) {
+        var getVar = __GET[i].split("=");
+        $_GET[getVar[0]] = typeof (getVar[1]) == "undefined" ? "" : getVar[1];
+      }
+      return $_GET;
+    }
+
+    var indexOf = function (arr, id, key) {
+      for (var idx = 0, l = arr.length; arr[idx] && arr[idx][key] !== id; idx++);
+      return idx === l ? -1 : idx;
+    };
+  </script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBCDTTmeMLmwzXVeF9BH4JjXKhO3uQfy80&callback=initMap"></script>
+
+  <script src="js/flickr.js"></script>
+  <script src="bin/oms.min.js"></script>
+  <script>
+    (function (i, s, o, g, r, a, m) {
+      i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+      }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-92888920-1', 'auto');
+    ga('send', 'pageview');
+  </script>
+  <!-- Yandex.Metrika counter -->
+  <script type="text/javascript">
+    (function (d, w, c) {
+      (w[c] = w[c] || []).push(function () {
+        try {
+          w.yaCounter43187499 = new Ya.Metrika({
+            id: 43187499,
+            clickmap: true,
+            trackLinks: true,
+            accurateTrackBounce: true,
+            webvisor: true,
+            trackHash: true
+          });
+        } catch (e) { }
+      });
+
+      var n = d.getElementsByTagName("script")[0],
+        s = d.createElement("script"),
+        f = function () { n.parentNode.insertBefore(s, n); };
+      s.type = "text/javascript";
+      s.async = true;
+      s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+      if (w.opera == "[object Opera]") {
+        d.addEventListener("DOMContentLoaded", f, false);
+      } else { f(); }
+    })(document, window, "yandex_metrika_callbacks");
+  </script>
+  <noscript>
+    <div>
+      <img src="https://mc.yandex.ru/watch/43187499" style="position:absolute; left:-9999px;" alt="" />
+    </div>
+  </noscript>
+  <!-- /Yandex.Metrika counter -->
+</body>
+
+</html>
