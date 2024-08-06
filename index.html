@@ -5,6 +5,10 @@
     <title>The Adventures of an Introvert</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
     <link rel="stylesheet" href="leaflet/leaflet.css" />
     <link rel="stylesheet" href="leaflet-plugins/cluster141/MarkerCluster.css" />
     <link rel="stylesheet" href="leaflet-plugins/photo/Leaflet.Photo.css" />
@@ -58,7 +62,6 @@
         }
 
         .leaflet-popup-photo p {
-            /*margin: 5px 0 0 0;*/
             font-weight: bold;
             margin: 0;
             padding-left: 1em;
@@ -133,7 +136,7 @@
             flickrAPI += "&user_id=28007771%40N06";
             flickrAPI += "&has_geo=1";
             flickrAPI += "&sort=date-taken-desc";
-            flickrAPI += "&extras=geo,url_t,url_q,url_h,url_o,owner_name,date_upload,license,date_taken,path_alias";
+            flickrAPI += "&extras=geo,url_q,url_h,owner_name,date_taken";
             flickrAPI += "&page=" + page;
             flickrAPI += "&format=json";
             flickrAPI += "&nojsoncallback=1";
@@ -144,13 +147,9 @@
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4 && xhr.status == 200) {
                     var data = JSON.parse(xhr.responseText);
-                    console.log(data.photos);
                     var photos = [];
                     for (var i = 0; i < data.photos.photo.length; i++) {
                         var p = data.photos.photo[i];
-                        var pdate = new Date(p.dateupload * 1000);
-                        var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'Septepmber', 'October', 'November', 'December'];
-                        pdate = pdate.getDate() + '&nbsp;' + months[pdate.getMonth()] + '&nbsp;' + pdate.getFullYear();
                         photos.push({
                             lat: p.latitude,
                             lng: p.longitude,
