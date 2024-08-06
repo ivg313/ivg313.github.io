@@ -26,25 +26,18 @@
         }
 
         .leaflet-popup-photo a.leaflet-popup-close-button {
-            top: -13px;
-            right: -13px;
-            background-color: #fff;
-            padding: 5px;
-            border-radius: 12px;
-            width: 15px;
-            height: 15px;
-            box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
-            color: #555;
+            top: auto;
+            bottom: 0px;
+            font-weight: bold;
+            color: red;
         }
 
-        .leaflet-popup-photo a.leaflet-popup-close-button:hover {
-            color: #333;
-            background-color: #eee;
-        }
+        .leaflet-popup-photo a.leaflet-popup-close-button:hover {}
 
         .leaflet-popup-photo .leaflet-popup-content-wrapper {
-            padding: 0px;
+            padding: 0;
             border-radius: 4px;
+            margin: 0;
         }
 
         .leaflet-popup-photo .leaflet-popup-content {
@@ -65,7 +58,11 @@
         }
 
         .leaflet-popup-photo p {
-            margin: 5px 0 0 0;
+            /*margin: 5px 0 0 0;*/
+            font-weight: bold;
+            margin: 0;
+            padding-left: 1em;
+            padding-right: 1em;
         }
 
         #social-panel {
@@ -81,8 +78,7 @@
             width: 30px;
             height: 30px;
             margin-left: 4px;
-            border-radius: 2px;
-            background-color: white;
+            border-radius: 4px;
         }
     </style>
     <script src="leaflet/leaflet.js"></script>
@@ -97,25 +93,11 @@
             <img src="img/telegram.png" title="Telegram"></a>
         <a href="https://www.flickr.com/photos/igorgrigoryev" target="_blank">
             <img src="img/flickr.png" title="Flickr"></a>
-        <!--
-        <a href="https://www.facebook.com/Igor.V.Grigoryev" target="_blank">
-          <img src="img/fb.png">
-        </a>
-    
-        <a href="https://www.instagram.com/ivg313/" target="_blank">
-          <img src="img/instagram.png">
-        </a>
-    -->
         <a href="https://www.youtube.com/c/IgorGrigoryev" target="_blank">
             <img src="img/yt.png" title="YouTube"></a>
 
         <a href="https://twitter.com/ivg" target="_blank">
             <img src="img/twitter.png" title="Twitter"></a>
-        <!--
-        <a href="https://vk.com/ivg313" target="_blank">
-          <img src="img/vk.png">
-        </a>
-    -->
         <a href="https://www.drive2.ru/users/ivg313/" target="_blank">
             <img src="img/d2.png" title="Drive 2"></a>
         <a href="https://github.com/ivg313" target="_blank">
@@ -124,20 +106,21 @@
     <div id="map"></div>
     <script>
         var map = L.map('map', { attributionControl: false }).setView([0, 0], 2);
+        L.control.scale().addTo(map);
 
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
-        var photoLayer = L.photo.cluster().on('click', function (evt) {
+        var photoLayer = L.photo.cluster({ showCoverageOnHover: true, maxClusterRadius: 40 }).on('click', function (evt) {
             var photo = evt.layer.photo,
-                template = '<a href="#" onclick="map.closePopup()"><img src="{url}"/></a><p>{caption}</p>';
+                template = '<a href="{link}" target="_new"><img src="{url}"/></a><p>{caption}</p>';
 
             evt.layer.bindPopup(L.Util.template(template, photo), {
                 className: 'leaflet-popup-photo',
                 minWidth: 500,
-                closeButton: false
+                closeButton: true
             }).openPopup();
         });
 
@@ -149,7 +132,8 @@
             flickrAPI += "&api_key=a34d2aaa34e8c82407b5a6eae3271925";
             flickrAPI += "&user_id=28007771%40N06";
             flickrAPI += "&has_geo=1";
-            flickrAPI += "&extras=geo,url_t,url_q,url_w,owner_name,date_upload,license,date_taken";
+            flickrAPI += "&sort=date-taken-desc";
+            flickrAPI += "&extras=geo,url_t,url_q,url_h,url_o,owner_name,date_upload,license,date_taken,path_alias";
             flickrAPI += "&page=" + page;
             flickrAPI += "&format=json";
             flickrAPI += "&nojsoncallback=1";
@@ -161,7 +145,6 @@
                 if (xhr.readyState == 4 && xhr.status == 200) {
                     var data = JSON.parse(xhr.responseText);
                     console.log(data.photos);
-                    //alert('total geophotos: ' + data.photos.photo.length);
                     var photos = [];
                     for (var i = 0; i < data.photos.photo.length; i++) {
                         var p = data.photos.photo[i];
@@ -171,11 +154,9 @@
                         photos.push({
                             lat: p.latitude,
                             lng: p.longitude,
-                            //url: 'https://www.flickr.com/photos/' + p.id + '_' + p.secret + '.jpg',
-                            url: p.url_w,
-                            caption: '<a id="' + p.id + '" title="' + p.title + '" href="https://www.flickr.com/photos/' + p.owner + '/' + p.id + '/" target="_new">' + p.title + '</a><br/>' +
-                                '<a href="https://www.flickr.com/">Flickr</a> &copy;&nbsp;<a href="http://www.flickr.com/photos/' + p.owner + '/" target="_new">' + p.ownername + '</a>, ' +
-                                pdate,
+                            url: p.url_h,
+                            link: 'https://www.flickr.com/photos/' + p.owner + '/' + p.id + '/',
+                            caption: p.title + "<br/>" + p.datetaken,
                             thumbnail: p.url_q
                         });
                     }
