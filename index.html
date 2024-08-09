@@ -5,10 +5,10 @@
     <title>The Adventures of an Introvert</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
     <link rel="stylesheet" href="leaflet/leaflet.css" />
     <link rel="stylesheet" href="leaflet-plugins/cluster141/MarkerCluster.css" />
     <link rel="stylesheet" href="leaflet-plugins/photo/Leaflet.Photo.css" />
@@ -57,8 +57,6 @@
             font-weight: bold;
             color: red;
         }
-
-        .leaflet-popup-photo a.leaflet-popup-close-button:hover {}
 
         .leaflet-popup-photo .leaflet-popup-content-wrapper {
             padding: 0;
@@ -138,7 +136,7 @@
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
-        var photoLayer = L.photo.cluster({ showCoverageOnHover: true, maxClusterRadius: 40 }).on('click', function (evt) {
+        var photoLayer = new L.photo.cluster({ showCoverageOnHover: true, maxClusterRadius: 40, animateAddingMarkers : true }).on('click', function (evt) {
             var photo = evt.layer.photo,
                 template = '<a href="{link}" target="_new"><img src="{url}"/></a><p>{caption}</p>';
 
@@ -157,7 +155,7 @@
             flickrAPI += "&api_key=a34d2aaa34e8c82407b5a6eae3271925";
             flickrAPI += "&user_id=28007771%40N06";
             flickrAPI += "&has_geo=1";
-            flickrAPI += "&sort=date-taken-desc";
+            flickrAPI += "&sort=date-taken-asc";
             flickrAPI += "&extras=geo,url_q,url_h,owner_name,date_taken";
             flickrAPI += "&page=" + page;
             flickrAPI += "&format=json";
@@ -195,9 +193,7 @@
             };
         };
 
-        window.addEventListener('load', function () {
-            flickrGet();
-        });
+        flickrGet();
 
     </script>
 </body>

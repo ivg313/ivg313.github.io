@@ -45,8 +45,8 @@ if (L.MarkerClusterGroup) {
 	L.Photo.Cluster = L.MarkerClusterGroup.extend({
 		options: {
 			featureGroup: L.photo,		
-			maxClusterRadius: 100,		
-			showCoverageOnHover: false,
+//			maxClusterRadius: 100,		
+//			showCoverageOnHover: false,
 			iconCreateFunction: function(cluster) {
 				return new L.DivIcon(L.extend({
 					className: 'leaflet-marker-photo', 
