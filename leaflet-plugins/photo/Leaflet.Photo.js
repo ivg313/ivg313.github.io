@@ -29,7 +29,7 @@ L.Photo = L.FeatureGroup.extend({
 				html: '<div style="background-image: url(' + photo.thumbnail + ');"></div>​',
 				className: 'leaflet-marker-photo'
 			}, photo, this.options.icon)),
-			title: photo.caption || ''
+			title: photo.caption.replace("<br/>", "\n") || ''
 		});		
 		marker.photo = photo;
 		return marker;
